@@ -51,4 +51,5 @@ workflows:
   karsajobs_ci:
     jobs:  
       - lint-dockerfile
+      - test-app
       - build-app-karsajobs
