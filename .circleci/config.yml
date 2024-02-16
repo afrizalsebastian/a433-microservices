@@ -1,0 +1,54 @@
+version: 2.1
+
+jobs:
+  lint-dockerfile:
+    docker:
+      - image: docker:stable
+
+    steps:
+      - checkout
+
+      # Install hadolint
+      - run:
+          name: Install hadolint
+          command: |
+            apk add --no-cache curl
+            curl -sL -o /usr/bin/hadolint "https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64"
+            chmod +x /usr/bin/hadolint
+
+      # Run hadolint against Dockerfile
+      - run:
+          name: Run hadolint
+          command: |
+            hadolint Dockerfile
+
+  test-app:
+    docker:
+      - image: golang:latest
+
+    steps:
+      - checkout
+
+      # Install dependencies and run tests
+      - run:
+          name: Install dependencies and run tests
+          command: |
+            go mod download
+            go test -v -short --count=1 $(go list ./...)
+
+  build-app-karsajobs:
+    docker:
+      - image: docker:stable
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: |
+          docker build -t $DOCKER_USERNAME/karsajobs:latest .
+          echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+          docker push $DOCKER_USERNAME/karsajobs:latest
+
+workflows:
+  karsajobs_ci:
+    jobs:  
+      - lint-dockerfile
+      - build-app-karsajobs
