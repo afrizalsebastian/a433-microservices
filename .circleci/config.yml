@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   lint-dockerfile:
     docker:
-      - image: docker:stable
+      - image: ubuntu
     steps:
       - checkout
       - run:
