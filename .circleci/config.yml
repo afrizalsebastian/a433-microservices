@@ -8,7 +8,8 @@ jobs:
       - checkout
       - run:
           name: Lint Dockerfile
-          command: hadolint Dockerfile
+          command: |
+            hadolint Dockerfile
 
 
   build-app-karsajobs-ui:
