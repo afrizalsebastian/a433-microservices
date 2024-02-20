@@ -22,19 +22,34 @@ jobs:
           command: |
             hadolint Dockerfile
 
-  build-app-karsajobs-ui:
+  test-app:
+    docker:
+      - image: golang:latest
+
+    steps:
+      - checkout
+
+      # Install dependencies and run tests
+      - run:
+          name: Install dependencies and run tests
+          command: |
+            go mod download
+            go test -v -short --count=1 $(go list ./...)
+
+  build-app-karsajobs:
     docker:
       - image: docker:stable
     steps:
       - checkout
       - setup_remote_docker
       - run: |
-          docker build -t $DOCKER_USERNAME/karsajobs-ui:latest .
+          docker build -t $DOCKER_USERNAME/karsajobs:latest .
           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-          docker push $DOCKER_USERNAME/karsajobs-ui:latest
+          docker push $DOCKER_USERNAME/karsajobs:latest
 
 workflows:
-  karsajobs_ui_ci:
+  karsajobs_ci:
     jobs:  
       - lint-dockerfile
-      - build-app-karsajobs-ui
+      - test-app
+      - build-app-karsajobs
